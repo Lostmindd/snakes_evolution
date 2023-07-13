@@ -1,11 +1,16 @@
 import pygame
 import random
 import game_field
-
+import Snake
 
 WIDTH = 1200
 HEIGHT = 600
 FPS = 30
+SNAKES_NUMBER = 30
+
+
+
+
 
 
 pygame.init()
@@ -16,8 +21,13 @@ clock = pygame.time.Clock()
 
 # draw field
 game_field.init_game_field(WIDTH, HEIGHT, screen)
-game_field.draw_snake_segment(1,3)
 
+
+snake_list = []
+for i in range(SNAKES_NUMBER):
+    snake = Snake.Snake()
+    snake_list.append(snake)
+print(game_field.field)
 
 
 
