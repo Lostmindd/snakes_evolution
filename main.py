@@ -7,7 +7,7 @@ WIDTH = 1200
 HEIGHT = 600
 FPS = 30
 SNAKES_NUMBER = 30
-
+APPLES_NUMBER = 40
 
 
 
@@ -27,8 +27,9 @@ snake_list = []
 for i in range(SNAKES_NUMBER):
     snake = Snake.Snake()
     snake_list.append(snake)
-print(game_field.field)
 
+for i in range(APPLES_NUMBER):
+    game_field.create_apple()
 
 
 

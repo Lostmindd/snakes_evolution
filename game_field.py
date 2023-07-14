@@ -23,8 +23,8 @@ def init_game_field(WIDTH, HEIGHT, screen_init):
     pygame.draw.line(screen, ORANGE, (20, HEIGHT - 20), (WIDTH - 20, HEIGHT - 20), 4)
 
     global field_size_y, field_size_x
-    field_size_y = 0
-    field_size_x = 0
+    field_size_y = 1
+    field_size_x = 1
     for i in range(40, HEIGHT - 20, 20):
         pygame.draw.line(screen, SAND, (20, i), (WIDTH - 20, i), 1)
         field_size_x += 1
@@ -54,13 +54,18 @@ def draw_snake_head(x,y):
 
 def create_snake(id):
     global field_size
-    snake_head_position = [random.randint(0,field_size[0]-1), random.randint(1,field_size[1]-3)]
+
+    snake_head_position = [random.randint(1,field_size[0]-2), random.randint(1,field_size[1]-3)]
     snake_tail_position = [snake_head_position[0], snake_head_position[1]+1]
     while field[snake_head_position[0]][snake_head_position[1]] != EMPTY \
             or field[snake_tail_position[0]][snake_tail_position[1]]!= EMPTY \
+            or field[snake_tail_position[0]-1][snake_tail_position[1]] != EMPTY \
+            or field[snake_tail_position[0]+1][snake_tail_position[1]] != EMPTY \
+            or field[snake_head_position[0] - 1][snake_head_position[1]] != EMPTY \
+            or field[snake_head_position[0] + 1][snake_head_position[1]] != EMPTY \
             or field[snake_head_position[0]][snake_head_position[1]-1]!= EMPTY \
             or field[snake_tail_position[0]][snake_tail_position[1]+1]!= EMPTY:
-        snake_head_position = [random.randint(0, field_size[0]-1), random.randint(1, field_size[1] - 2)]
+        snake_head_position = [random.randint(1, field_size[0]-2), random.randint(1, field_size[1] - 3)]
         snake_tail_position = [snake_head_position[0], snake_head_position[1] + 1]
     field[snake_head_position[0]][snake_head_position[1]] = id
     field[snake_tail_position[0]][snake_tail_position[1]] = id
@@ -68,3 +73,14 @@ def create_snake(id):
     draw_snake_segment(snake_tail_position[0], snake_tail_position[1])
     return snake_head_position, snake_tail_position
 
+def create_apple():
+    global field_size
+    apple_position = [random.randint(0, field_size[0] - 1), random.randint(0, field_size[1] - 1)]
+    place_iterator = 1
+    while field[apple_position[0]][apple_position[1]] != EMPTY:
+        apple_position[1] = (apple_position[1]+place_iterator) % field_size[1]
+        if place_iterator == field_size[1]:
+            place_iterator = 0
+            apple_position[0] = (apple_position[0] + 1) % field_size[0]
+    draw_apple(apple_position[0],apple_position[1])
+    field[apple_position[0]][apple_position[1]] = APPLE
