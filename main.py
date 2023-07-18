@@ -33,6 +33,8 @@ for i in range(APPLES_NUMBER):
 
 
 
+
+
 running = True
 while running:
     pygame.display.flip()

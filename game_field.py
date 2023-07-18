@@ -55,7 +55,7 @@ def draw_snake_head(x,y):
     pygame.draw.rect(screen, '#00db6a', (23+y*20, 23+x*20, 15, 15))
 
 def create_snake(id):
-
+    random.seed(4)
     snake_head_position = [random.randint(1,field_size[0]-2), random.randint(1,field_size[1]-3)]
     snake_tail_position = [snake_head_position[0], snake_head_position[1]+1]
     while field[snake_head_position[0]][snake_head_position[1]] != EMPTY \
@@ -85,6 +85,9 @@ def create_apple():
             apple_position[0] = (apple_position[0] + 1) % field_size[0]
     draw_apple(apple_position[0],apple_position[1])
     field[apple_position[0]][apple_position[1]] = APPLE
+
+def get_cell_content(x,y):
+    return field[x][y]
 
 def move_snake(snake, direction):
     if direction == 0:
