@@ -3,6 +3,7 @@ import random
 import pygame
 
 field = []
+snakes_coord = []
 screen = None
 field_size = []
 EMPTY = 100
@@ -46,16 +47,33 @@ def draw_apple(x,y):
     global screen
     pygame.draw.circle(screen, '#f80000', (30+y*20, 30+x*20), 7)
 
+def create_apple(x,y):
+    draw_apple(x, y)
+    field[x][y] = APPLE
+
 def draw_snake_segment(x,y):
     global screen
     pygame.draw.rect(screen, '#00a550', (23+y*20, 23+x*20, 15, 15))
+
+def create_snake_segment(x,y, id):
+    draw_snake_segment(x,y)
+    field[x][y] = id
 
 def draw_snake_head(x,y):
     global screen
     pygame.draw.rect(screen, '#00db6a', (23+y*20, 23+x*20, 15, 15))
 
+def create_snake_head(x,y, id):
+    draw_snake_head(x,y)
+    field[x][y] = id
+
+def draw_empty(x,y):
+    global screen
+    pygame.draw.rect(screen, '#000000', (23+y*20, 23+x*20, 15, 15))
+
+
 def create_snake(id):
-    random.seed(4)
+    # random.seed(4)
     snake_head_position = [random.randint(1,field_size[0]-2), random.randint(1,field_size[1]-3)]
     snake_tail_position = [snake_head_position[0], snake_head_position[1]+1]
     while field[snake_head_position[0]][snake_head_position[1]] != EMPTY \
@@ -68,13 +86,11 @@ def create_snake(id):
             or field[snake_tail_position[0]][snake_tail_position[1]+1]!= EMPTY:
         snake_head_position = [random.randint(1, field_size[0]-2), random.randint(1, field_size[1] - 3)]
         snake_tail_position = [snake_head_position[0], snake_head_position[1] + 1]
-    field[snake_head_position[0]][snake_head_position[1]] = id
-    field[snake_tail_position[0]][snake_tail_position[1]] = id
-    draw_snake_head(snake_head_position[0],snake_head_position[1])
-    draw_snake_segment(snake_tail_position[0], snake_tail_position[1])
-    return snake_head_position, snake_tail_position
+    snakes_coord.append([snake_tail_position, snake_head_position])
+    create_snake_head(snake_head_position[0],snake_head_position[1], id)
+    create_snake_segment(snake_tail_position[0], snake_tail_position[1], id)
 
-def create_apple():
+def create_random_apple():
     global field_size
     apple_position = [random.randint(0, field_size[0] - 1), random.randint(0, field_size[1] - 1)]
     place_iterator = 1
@@ -83,12 +99,31 @@ def create_apple():
         if place_iterator == field_size[1]:
             place_iterator = 0
             apple_position[0] = (apple_position[0] + 1) % field_size[0]
-    draw_apple(apple_position[0],apple_position[1])
-    field[apple_position[0]][apple_position[1]] = APPLE
+    create_apple(apple_position[0],apple_position[1])
+
+def destroy_snake(id):
+    for coord in snakes_coord[id]:
+        draw_empty(coord[0], coord[1])
+        create_apple(coord[0], coord[1])
+
+def move_snake(id, move_coord):
+    if field[move_coord[0]][move_coord[1]] != APPLE:
+        # delete tail
+        tail_coord = snakes_coord[id].pop(0)
+        field[tail_coord[0]][tail_coord[1]] = EMPTY
+        draw_empty(tail_coord[0], tail_coord[1])
+    else:
+        create_random_apple()
+
+    # head movement
+    old_head_coord = [snakes_coord[id][-1][0], snakes_coord[id][-1][1]]
+    draw_snake_segment(old_head_coord[0], old_head_coord[1])
+    create_snake_head(move_coord[0], move_coord[1], id)
+    snakes_coord[id].append(move_coord)
+
+
 
 def get_cell_content(x,y):
     return field[x][y]
 
-def move_snake(snake, direction):
-    if direction == 0:
-        pass
+
