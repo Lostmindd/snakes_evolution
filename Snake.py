@@ -1,8 +1,8 @@
 import random
 import game_field
 
-MAX_COMMAND_NUMBER = 10
-SNAKE_MEMORY_SIZE = 32
+MAX_COMMAND_NUMBER = 256 # 10
+SNAKE_MEMORY_SIZE = 128 # 32
 CHECK_COMMAND_END = 7
 MOVE_COMMAND_END = 10
 GOTO_COMMAND_END = SNAKE_MEMORY_SIZE
@@ -17,12 +17,18 @@ OWN_BODY = 5
 class Snake:
     current_id = 0
 
-    def __init__(self):
-        self.dnk = [random.randint(0, SNAKE_MEMORY_SIZE-1) for i in range(SNAKE_MEMORY_SIZE)]
+    def __init__(self, dnk=None):
+        self.color = '#00a550'
+        if dnk is None:
+            self.dnk = [random.randint(0, SNAKE_MEMORY_SIZE-1) for i in range(SNAKE_MEMORY_SIZE)]
+        else:
+            self.dnk = dnk.copy()
         self.dnk_cursor = 0
         self.snake_id = Snake.current_id
         Snake.current_id += 1
         self.current_direction = 'LEFT'
+        self.is_destroyed = False
+        self.weight = 2
         game_field.create_snake(self.snake_id)
 
     def make_decision(self):
@@ -36,11 +42,16 @@ class Snake:
                 cursor_shift = self.check_cell(current_command)
                 if cursor_shift in [WALL, ANOTHER_BOT_BODY, OWN_BODY]:
                     game_field.destroy_snake(self.snake_id)
+                    self.is_destroyed = True
                     return
                 self.dnk_cursor = (self.dnk_cursor + cursor_shift) % SNAKE_MEMORY_SIZE
+                head_coord = game_field.snakes_coord[self.snake_id][-1]
                 coord_offset = self.get_coord_offset(current_command)
-                game_field.move_snake(self.snake_id, coord_offset)
-                self.change_current_direction(current_command)
+                move_coord = [head_coord[0] + coord_offset[0], head_coord[1] + coord_offset[1]]
+                game_field.move_snake(self.snake_id, move_coord)
+                if cursor_shift == APPLE:
+                    self.weight += 1
+                self.current_direction = self.change_current_direction(current_command)
 
             elif MOVE_COMMAND_END <= current_command < GOTO_COMMAND_END:
                 self.dnk_cursor = (self.dnk_cursor + current_command) % SNAKE_MEMORY_SIZE
@@ -76,7 +87,7 @@ class Snake:
 
     def change_current_direction(self, command):
         command_index = command - CHECK_COMMAND_END
-        directions = ['RIGHT', 'UP', 'LEFT', 'DOWN']
+        directions = ['LEFT', 'UP', 'RIGHT', 'DOWN']
         current_direction_index = directions.index(self.current_direction)
         if command_index == 0:
             # shift in list directions clockwise
@@ -84,3 +95,4 @@ class Snake:
         elif command_index == 2:
             # shift in list directions counterclockwise
             return directions[(current_direction_index + 1)%4]
+        else: return self.current_direction
